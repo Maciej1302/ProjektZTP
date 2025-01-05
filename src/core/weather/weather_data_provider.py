@@ -1,5 +1,5 @@
-from src.core.observer import Subject, Observer
-from src.core.multiton import Multiton
+from src.core.alerts.observer import Subject, Observer
+from src.core.utils.multiton import Multiton
 
 
 class WeatherDataProvider(Multiton, Subject):
