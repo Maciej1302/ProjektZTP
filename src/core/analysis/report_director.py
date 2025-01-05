@@ -1,4 +1,4 @@
-from src.core.analysis_report_builder import AnalysisReportBuilder
+from src.core.analysis.analysis_report_builder import AnalysisReportBuilder
 from typing import Any
 
 

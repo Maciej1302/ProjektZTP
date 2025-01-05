@@ -1,6 +1,5 @@
-from abc import ABC, abstractmethod
 from typing import List
-from src.core.location_hierarchy import ILocation
+from src.core.locations.location_hierarchy import ILocation
 
 
 class User:
@@ -39,8 +38,8 @@ class User:
             alert.trigger_alert()
 
 if __name__ == "__main__":
-    from src.core.weather_alert import WeatherAlert
-    from src.core.location_hierarchy import City
+    from src.core.alerts.weather_alert import WeatherAlert
+    from src.core.locations.location_hierarchy import City
 
     class TestAlert(WeatherAlert):
         def trigger_alert(self) -> None:

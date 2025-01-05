@@ -1,6 +1,6 @@
 import requests
 from datetime import datetime, timezone
-from src.core.weather_data import WeatherData
+from src.core.weather.weather_data import WeatherData
 
 class WeatherDataAdapter:
     """
