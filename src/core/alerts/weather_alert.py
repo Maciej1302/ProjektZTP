@@ -1,5 +1,5 @@
-from src.core.observer import Observer
-from src.core.location_hierarchy import ILocation
+from src.core.alerts.observer import Observer
+from src.core.locations.location_hierarchy import ILocation
 
 
 class WeatherAlert(Observer):

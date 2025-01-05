@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from src.services.weather_data_adapter import WeatherDataAdapter
+from src.core.services.weather_data_adapter import WeatherDataAdapter
 from src.core.weather.weather_data import WeatherData
 
 
@@ -163,37 +163,4 @@ class Region(ILocation):
 
         return aggregated_forecast
 
-if __name__ == "__main__":
-    # Testowanie hierarchii lokalizacji
 
-    # Przygotowanie adaptera z fikcyjnym kluczem API
-    API_KEY = "e1cb2b3a3fed1c8e38a4ef4cc9b7c6ec"
-    adapter = WeatherDataAdapter(api_key=API_KEY)
-
-    # Tworzenie miast
-    warsaw = City("Warsaw", latitude=52.2297, longitude=21.0122)
-    krakow = City("Krakow", latitude=50.0647, longitude=19.9450)
-
-    # Tworzenie regionu
-    mazowsze = Region("Mazowsze")
-    mazowsze.add_location(warsaw)
-
-    # Tworzenie kraju
-    poland = Region("Poland")
-    poland.add_location(mazowsze)
-    poland.add_location(krakow)
-
-    # Testowanie pobierania danych pogodowych
-    print("Pogoda dla Warszawy:")
-    print(warsaw.get_weather(adapter))
-
-    print("\nPogoda dla Mazowsza:")
-    print(mazowsze.get_weather(adapter))
-
-    print("\nPogoda dla Polski:")
-    print(poland.get_weather(adapter))
-
-    print("\nPrognoza dla Krakowa na 3 dni:")
-    forecast = krakow.get_forecast(adapter, days=3)
-    for day, weather in enumerate(forecast, start=1):
-        print(f"Day {day}: {weather}")
