@@ -1,34 +1,31 @@
-from src.core.utils.multiton import Multiton
-from src.services.weather_data_adapter import WeatherDataAdapter
-from src.core.weather.weather_data import WeatherData
+from src.core.observer import Subject, Observer
+from src.core.multiton import Multiton
 
 
-class WeatherDataProvider(Multiton):
+class WeatherDataProvider(Multiton, Subject):
     """
-    Klasa dostarczająca dane pogodowe dla różnych lokalizacji, implementująca wzorzec Multiton.
+    Klasa dostarczająca dane pogodowe, implementująca wzorzec Multiton i Observer.
     """
 
     def __init__(self, key: str):
-        """
-        Inicjalizacja instancji WeatherDataProvider dla konkretnej lokalizacji.
-        :param key: Nazwa lokalizacji
-        """
-        super().__init__(key)  # Wywołanie konstruktora Multiton
-        self.location = key
-        self.adapter = None
+        super().__init__(key)
+        self._observers: list[Observer] = []
+        self.weather_data = None
 
-    def set_adapter(self, adapter: WeatherDataAdapter):
-        """
-        Ustawia adapter do pobierania danych pogodowych.
-        :param adapter: Obiekt adaptera
-        """
-        self.adapter = adapter
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
 
-    def get_weather(self) -> WeatherData:
+    def detach(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+
+    def notify(self) -> None:
+        for observer in self._observers:
+            observer.update(self.weather_data)
+
+    def set_weather_data(self, weather_data: dict) -> None:
         """
-        Pobiera aktualne dane pogodowe dla lokalizacji.
-        :return: Obiekt WeatherData
+        Ustawia nowe dane pogodowe i powiadamia obserwatorów.
+        :param weather_data: Słownik z danymi pogodowymi.
         """
-        if not self.adapter:
-            raise ValueError("Adapter nie został ustawiony!")
-        return self.adapter.fetch_weather(self.location)
+        self.weather_data = weather_data
+        self.notify()
