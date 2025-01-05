@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 from src.services.weather_data_adapter import WeatherDataAdapter
-from src.core.weather_data import WeatherData
+from src.core.weather.weather_data import WeatherData
 
 
 class ILocation(ABC):

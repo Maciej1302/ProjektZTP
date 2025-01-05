@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.core.analysis_report import AnalysisReport
+from src.core.analysis.analysis_report import AnalysisReport
 
 
 class AnalysisReportBuilder(ABC):

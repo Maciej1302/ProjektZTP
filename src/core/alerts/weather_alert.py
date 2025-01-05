@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
-from src.core.location_hierarchy import ILocation
-from src.core.user import User
+from src.core.locations.location_hierarchy import ILocation
 
 
 class WeatherAlert(ABC):
@@ -64,7 +62,7 @@ class AlertFactory:
 
 
 if __name__ == "__main__":
-    from src.core.location_hierarchy import City
+    from src.core.locations.location_hierarchy import City
     from src.services.weather_data_adapter import WeatherDataAdapter
 
     # Inicjalizacja adaptera z kluczem API

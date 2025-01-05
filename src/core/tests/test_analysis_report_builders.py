@@ -1,5 +1,5 @@
-from src.core.report_director import ReportDirector
-from src.core.analysis_report_builder import ComparisonAnalysisReportBuilder, TrendAnalysisReportBuilder
+from src.core.analysis.report_director import ReportDirector
+from src.core.analysis.analysis_report_builder import ComparisonAnalysisReportBuilder, TrendAnalysisReportBuilder
 
 if __name__ == "__main__":
     # Inicjalizacja dyrektora
