@@ -96,9 +96,7 @@ class ConsoleInterface:
 
     def add_city(self):
         name = input("Podaj nazwę miasta: ")
-        latitude = float(input("Podaj szerokość geograficzną: "))
-        longitude = float(input("Podaj długość geograficzną: "))
-        self.locations[name] = City(name=name, latitude=latitude, longitude=longitude)
+        self.locations[name] = City(name=name)
         print(f"Miasto {name} zostało dodane.")
 
     def add_region(self):

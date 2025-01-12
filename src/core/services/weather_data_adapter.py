@@ -89,18 +89,3 @@ class WeatherDataAdapter:
 
         return forecast[:days]  # Ograniczenie wyników do liczby dni
 
-# Przykład użycia !!!!!!do usuniecia!!!!!!
-if __name__ == "__main__":
-    API_KEY = "e1cb2b3a3fed1c8e38a4ef4cc9b7c6ec"  # Wprowadź swój klucz API
-    adapter = WeatherDataAdapter(api_key=API_KEY)
-
-    try:
-        weather = adapter.fetch_weather("Warsaw")
-        print("Pogoda teraz:", weather)
-
-        forecast = adapter.fetch_forecast("Warsaw", 3)
-        print("Prognoza na 3 dni:")
-        for day, weather in enumerate(forecast, start=1):
-            print(f"Dzień {day}: {weather}")
-    except requests.HTTPError as e:
-        print(f"Błąd pobierania danych: {e}")
