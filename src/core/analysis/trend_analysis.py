@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from src.core.weather.weather_data import WeatherData
 from src.core.analysis.analysis_report import AnalysisReport
 from src.core.analysis.analysis_strategy import AnalysisStrategy
@@ -6,20 +6,16 @@ from src.core.analysis.analysis_strategy import AnalysisStrategy
 
 class TrendAnalysis(AnalysisStrategy):
     """
-    Klasa realizująca analizę trendów na danych pogodowych.
+    Implementacja strategii analizy trendów pogodowych.
     """
 
-    def analyze(self, data: List[WeatherData]) -> AnalysisReport:
-        report = AnalysisReport()
-        report.summary = "Trend Analysis Report"
+    def analyze(self, data: List[WeatherData]) -> dict[str, list[float]]:
+        """
+        Przetwarza dane pogodowe i generuje dane wejściowe dla raportu trendów.
+        """
 
-        # Analiza trendów: obliczanie średniej temperatury
-        average_temperature = sum(d.temperature for d in data) / len(data)
-        trend_details = {
-            "start_date": data[0].date,
-            "end_date": data[-1].date,
-            "average_temperature": average_temperature
+        return {
+            "temperatures": [day.temperature for day in data],
+            "precipitations": [day.precipitation for day in data],
+            "wind_speeds": [day.wind_speed for day in data],
         }
-
-        report.details = trend_details
-        return report

@@ -1,6 +1,6 @@
 from typing import List
 from src.core.locations.location_hierarchy import ILocation
-
+from src.core.alerts.weather_alert import WeatherAlert
 
 class User:
     """
@@ -10,52 +10,51 @@ class User:
     def __init__(self, name: str):
         self.name = name
         self.favourite_locations: List[ILocation] = []
-        self.alerts = []
+        self.alerts: List[WeatherAlert] = []
 
     def add_favourite_location(self, location: ILocation) -> None:
         """
         Dodaje lokalizację do listy ulubionych lokalizacji użytkownika.
         """
         self.favourite_locations.append(location)
+        print(f"Lokalizacja {location.get_name()} została dodana do ulubionych.")
 
-    def remove_favourite_location(self, location: ILocation) -> None:
+    def remove_favourite_location(self, location_name: str) -> None:
         """
         Usuwa lokalizację z listy ulubionych lokalizacji użytkownika.
         """
-        self.favourite_locations.remove(location)
+        for location in self.favourite_locations:
+            if location.get_name() == location_name:
+                self.favourite_locations.remove(location)
+                print(f"Lokalizacja {location_name} została usunięta z ulubionych.")
+                return
+        print(f"Lokalizacja {location_name} nie została znaleziona w ulubionych.")
 
-    def add_alert(self, alert) -> None:
+    def list_favourite_locations(self) -> None:
+        """
+        Wyświetla ulubione lokalizacje użytkownika.
+        """
+        if not self.favourite_locations:
+            print("Brak ulubionych lokalizacji.")
+        else:
+            print("Ulubione lokalizacje użytkownika:")
+            for location in self.favourite_locations:
+                print(f"- {location.get_name()}")
+
+    def add_alert(self, alert: WeatherAlert) -> None:
         """
         Dodaje alert pogodowy do użytkownika.
         """
         self.alerts.append(alert)
+        print(f"Alert został dodany: {alert.get_alert_message()} dla {alert.location.get_name()}.")
 
     def trigger_all_alerts(self) -> None:
         """
         Wywołuje wszystkie alerty pogodowe użytkownika.
         """
-        for alert in self.alerts:
-            alert.trigger_alert()
-
-if __name__ == "__main__":
-    from src.core.alerts.weather_alert import WeatherAlert
-    from src.core.locations.location_hierarchy import City
-
-    class TestAlert(WeatherAlert):
-        def trigger_alert(self) -> None:
-            print(f"ALERT dla lokalizacji {self.location.get_name()}: {self._alert_message}")
-
-    # Testowanie klasy User
-    user = User(name="Alice")
-
-    # Tworzenie przykładowej lokalizacji
-    warsaw = City("Warsaw", latitude=52.2297, longitude=21.0122)
-
-    # Dodawanie lokalizacji do ulubionych
-    user.add_favourite_location(warsaw)
-    print(f"Ulubione lokalizacje użytkownika {user.name}: {[loc.get_name() for loc in user.favourite_locations]}")
-
-    # Dodawanie i wywoływanie alertów
-    alert = TestAlert(location=warsaw, alert_message="Silne wiatry!")
-    user.add_alert(alert)
-    user.trigger_all_alerts()
+        if not self.alerts:
+            print("Brak alertów do wywołania.")
+        else:
+            print("Wywoływanie alertów użytkownika:")
+            for alert in self.alerts:
+                alert.trigger_alert()

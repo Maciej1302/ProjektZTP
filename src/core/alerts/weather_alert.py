@@ -27,7 +27,7 @@ class WeatherAlert(Observer):
 
 class StormAlert(WeatherAlert):
     def trigger_alert(self, weather_data: dict) -> None:
-        if weather_data["wind_speed"] > 20:
+        if weather_data["wind_speed"] > 10:
             print(f"ALERT: {self.alert_message} w lokalizacji {self.location.get_name()}!")
 
 

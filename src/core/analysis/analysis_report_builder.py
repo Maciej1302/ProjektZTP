@@ -48,14 +48,21 @@ class ComparisonAnalysisReportBuilder(AnalysisReportBuilder):
 
 class TrendAnalysisReportBuilder(AnalysisReportBuilder):
     """
-    Budowniczy raportów trendów.
+    Budowniczy raportów trendów pogodowych.
     """
 
     def set_summary(self, summary: str) -> None:
         self.report.summary = summary
 
     def set_details(self, details: dict) -> None:
+        """
+        Szczegóły zawierają analizę trendów pogodowych, np. minimalne, maksymalne i średnie wartości.
+        """
         self.report.details = {
             "type": "Trend",
-            **details
+            "minimum_temperature": min(details["temperatures"]),
+            "maximum_temperature": max(details["temperatures"]),
+            "average_temperature": sum(details["temperatures"]) / len(details["temperatures"]),
+            "total_precipitation": sum(details["precipitations"]),
+            "average_wind_speed": sum(details["wind_speeds"]) / len(details["wind_speeds"])
         }
