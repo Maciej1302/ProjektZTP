@@ -42,10 +42,8 @@ class City(ILocation):
     Klasa reprezentująca pojedyncze miasto.
     """
 
-    def __init__(self, name: str, latitude: float, longitude: float):
+    def __init__(self, name: str):
         self.name = name
-        self.latitude = latitude
-        self.longitude = longitude
 
     def get_name(self) -> str:
         return self.name
@@ -107,6 +105,7 @@ class Region(ILocation):
         count = 0
 
         for location in self.locations:
+
             weather = location.get_weather(adapter)
             total_temperature += weather.temperature
             total_humidity += weather.humidity

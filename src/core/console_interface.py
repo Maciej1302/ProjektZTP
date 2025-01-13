@@ -81,6 +81,8 @@ class ConsoleInterface:
         print("2. Dodaj region")
         print("3. Usuń lokalizację")
         print("4. Wyświetl wszystkie lokalizacje")
+        print("5. Dodaj miasto do regionu")
+
 
         choice = input("Wybierz opcję: ")
         if choice == "1":
@@ -91,6 +93,8 @@ class ConsoleInterface:
             self.remove_location()
         elif choice == "4":
             self.list_locations()
+        elif choice=="5":
+            self.add_region_location()
         else:
             print("Nieprawidłowy wybór.")
 
@@ -103,6 +107,12 @@ class ConsoleInterface:
         name = input("Podaj nazwę regionu: ")
         self.locations[name] = Region(name=name)
         print(f"Region {name} został dodany.")
+
+    def add_region_location(self):
+        name = input("Podaj nazwe regionu dla którego chcesz dodać miasto")
+        locations = input("Podaj nazwe miasta które chcesz dodać do tego regionu ")
+        self.locations[name].add_location(City(name=locations))
+        print(f"Miasta {locations} zostały dodane do regionu {name}.")
 
     def remove_location(self):
         name = input("Podaj nazwę lokalizacji do usunięcia: ")
