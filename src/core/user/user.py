@@ -46,7 +46,7 @@ class User:
         Dodaje alert pogodowy do użytkownika.
         """
         self.alerts.append(alert)
-        print(f"Alert został dodany: {alert.get_alert_message()} dla {alert.location.get_name()}.")
+        print(f"Alert został dodany: {alert.alert_message} dla {alert.location.get_name()}.")
 
     def trigger_all_alerts(self) -> None:
         """
@@ -57,4 +57,4 @@ class User:
         else:
             print("Wywoływanie alertów użytkownika:")
             for alert in self.alerts:
-                alert.trigger_alert()
+                print(f"{alert.alert_message} dla {alert.location.get_name()}")

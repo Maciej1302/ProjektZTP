@@ -1,19 +1,25 @@
 import os
 import csv
 from src.core.alerts.weather_alert import StormAlert, FrostAlert
-from src.core.locations.location_hierarchy import City, Region
+from src.core.analysis.comparison_analysis import ComparisonAnalysis
+from src.core.locations.location_hierarchy import City, Region, ILocation
 from src.core.analysis.report_director import ReportDirector
-from src.core.analysis.analysis_report_builder import TrendAnalysisReportBuilder
+from src.core.analysis.analysis_report_builder import TrendAnalysisReportBuilder, ComparisonAnalysisReportBuilder
 from src.core.services.weather_data_adapter import WeatherDataAdapter
 from src.core.user.user import User
 from src.core.alerts.weather_alert import StormAlert,FrostAlert
 from src.core.analysis.trend_analysis import TrendAnalysis
+from src.core.weather.weather_data import WeatherData
+from src.core.utils.SingletonWeatherDataProvider import SingletonWeatherDataProvider
+
 
 class ConsoleInterface:
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.adapter = WeatherDataAdapter(api_key=self.api_key)
+        self.weatherdata = WeatherData(temperature=15, humidity=80, wind_speed=5, precipitation=2, date="2023-12-31")
+        self.weather_provider = SingletonWeatherDataProvider(api_key=api_key)
         self.locations = {}
+        self.adapter = WeatherDataAdapter(api_key=api_key)
         self.alerts = []
         self.user = User(name='Cukierek')
 
@@ -29,9 +35,7 @@ class ConsoleInterface:
             print("3. Zarządzanie lokalizacjami")
             print("4. Alerty pogodowe")
             print("5. Analizy i raporty pogodowe")
-            print("6. Import/eksport danych")
-            print("7. Zarządzanie użytkownikiem")
-            print("8. Wyjście")
+            print("6. Wyjście")
 
             choice = input("Wybierz opcję: ")
             if choice == "1":
@@ -45,10 +49,6 @@ class ConsoleInterface:
             elif choice == "5":
                 self.weather_analysis_reports()
             elif choice == "6":
-                self.import_export_data()
-            elif choice == "7":
-                self.manage_user()  # Zarządzanie użytkownikiem
-            elif choice == "8":
                 print("Do zobaczenia!")
                 break
             else:
@@ -60,31 +60,109 @@ class ConsoleInterface:
         location_name = input("Podaj nazwę lokalizacji (miasto lub region): ")
         if location_name in self.locations:
             location = self.locations[location_name]
-            weather = location.get_weather(self.adapter)
-            for alert in self.alerts:
-                name = alert.location.get_name
-                if name in self.locations.keys():
-                    print(alert.alert_message)
-            print(f"Aktualna pogoda dla {location_name}:")
-            print(weather)
+
+            if isinstance(location, City):
+                # Dla pojedynczego miasta
+                city_name = location.get_name()
+                weather = self.weather_provider.fetch_weather(city_name)
+
+                # Aktualizacja danych pogodowych i powiadamianie obserwatorów
+                self.weatherdata.update_weather(
+                    temperature=weather.temperature,
+                    humidity=weather.humidity,
+                    wind_speed=weather.wind_speed,
+                    precipitation=weather.precipitation,
+                    date=weather.date
+                )
+
+                # Wyświetlanie danych pogodowych
+                print(f"Aktualna pogoda dla {city_name}:")
+                print(f"  Temperatura: {self.weatherdata.temperature:.1f}°C")
+
+                print(f"  Wilgotność: {self.weatherdata.humidity:.1f}%")
+
+                print(f"  Prędkość wiatru: {self.weatherdata.wind_speed:.1f} km/h")
+
+                print(f"  Opady: {self.weatherdata.precipitation:.1f} mm")
+
+
+            elif isinstance(location, Region):
+
+                # Dla regionu – wykorzystanie get_weather do agregacji danych
+
+                weather = location.get_weather(self.weather_provider.adapter)
+
+                # Aktualizacja danych pogodowych w `WeatherData` (powiadamianie obserwatorów)
+
+                self.weatherdata.update_weather(
+
+                    temperature=weather.temperature,
+
+                    humidity=weather.humidity,
+
+                    wind_speed=weather.wind_speed,
+
+                    precipitation=weather.precipitation,
+
+                    date=weather.date
+
+                )
+
+                # Wyświetlanie danych pogodowych dla regionu
+
+                print(f"Aktualna pogoda dla regionu {location_name}:")
+
+                print(f"  Temperatura: {weather.temperature:.1f}°C")
+
+                print(f"  Wilgotność: {weather.humidity:.1f}%")
+
+                print(f"  Prędkość wiatru: {weather.wind_speed:.1f} km/h")
+
+                print(f"  Opady: {weather.precipitation:.1f} mm")
+
+            else:
+                print("Nieznany typ lokalizacji.")
         else:
             print("Lokalizacja nieznaleziona.")
+
         input("\nNaciśnij Enter, aby powrócić do menu.")
 
     def view_forecasts(self):
         self.clear_screen()
         print("=== Prognozy pogody ===")
         location_name = input("Podaj nazwę lokalizacji (miasto lub region): ")
+
         if location_name in self.locations:
             location = self.locations[location_name]
             days = int(input("Podaj liczbę dni prognozy (3 lub 7): "))
-            forecast = location.get_forecast(self.adapter, days)
-            print(f"Prognoza pogody dla {location_name}:")
-            for day in forecast:
-                print(day)
+
+            if isinstance(location, City):
+                # Obsługa dla miasta
+                city_name = location.get_name()
+                forecast = location.get_forecast(self.weather_provider.adapter, days)
+                print(f"Prognoza pogody dla {city_name}:")
+                for day in forecast:
+                    print(f"  Data: {day.date}")
+                    print(f"    Temperatura: {day.temperature:.1f}°C")
+                    print(f"    Wilgotność: {day.humidity:.1f}%")
+                    print(f"    Prędkość wiatru: {day.wind_speed:.1f} km/h")
+                    print(f"    Opady: {day.precipitation:.1f} mm")
+
+            elif isinstance(location, Region):
+                # Obsługa dla regionu
+                forecast = location.get_forecast(self.weather_provider.adapter, days)
+                print(f"Prognoza pogody dla regionu {location_name}:")
+                for day in forecast:
+                    print(f"  Data: {day.date}")
+                    print(f"    Temperatura: {day.temperature:.1f}°C")
+                    print(f"    Wilgotność: {day.humidity:.1f}%")
+                    print(f"    Prędkość wiatru: {day.wind_speed:.1f} km/h")
+                    print(f"    Opady: {day.precipitation:.1f} mm")
+
+            else:
+                print("Nieznany typ lokalizacji.")
         else:
             print("Lokalizacja nieznaleziona.")
-        input("\nNaciśnij Enter, aby powrócić do menu.")
 
     def manage_locations(self):
         self.clear_screen()
@@ -160,8 +238,10 @@ class ConsoleInterface:
             alert_message = input("Podaj treść alertu: ")
             if alert_type == "storm":
                 alert = StormAlert(location=self.locations[location_name], alert_message=alert_message)
+                self.weatherdata.attach(alert)
             elif alert_type == "frost":
                 alert = FrostAlert(location=self.locations[location_name], alert_message=alert_message)
+                self.weatherdata.attach(alert)
             else:
                 print("Nieprawidłowy typ alertu.")
                 return
@@ -219,30 +299,44 @@ class ConsoleInterface:
             print("Lokalizacja nieznaleziona.")
 
     def comparison_analysis(self):
-        location1_name = input("Podaj nazwę pierwszej lokalizacji: ")
-        location2_name = input("Podaj nazwę drugiej lokalizacji: ")
+        """
+        Analiza porównawcza prognoz pogodowych dla wybranych lokalizacji.
+        """
+        locations = input("Podaj nazwy lokalizacji oddzielone przecinkiem: ").split(',')
+        selected_locations = []
 
-        if location1_name in self.locations and location2_name in self.locations:
-            location1 = self.locations[location1_name]
-            location2 = self.locations[location2_name]
+        for location_name in locations:
+            location_name = location_name.strip()
+            if location_name in self.locations:
+                selected_locations.append(self.locations[location_name])
+            else:
+                print(f"Lokalizacja {location_name} nieznaleziona.")
 
-            # Pobranie danych pogodowych dla obu lokalizacji
-            data1 = location1.get_forecast(self.adapter, 7)
-            data2 = location2.get_forecast(self.adapter, 7)
+        if len(selected_locations) < 2:
+            print("Wymagane są przynajmniej dwie lokalizacje do analizy porównawczej.")
+            return
 
-            # Tworzenie raportu porównawczego
-            #builder = ComparisonAnalysisReportBuilder()
-            director = ReportDirector()
-            #report = director.construct(builder, (data1, data2))
-            print("Raport porównawczy:")
-            print(report)
+        # Pobranie prognoz dla każdej lokalizacji
+        data = [location.get_forecast(self.adapter, 7) for location in selected_locations]
 
-            # Zapis raportu do pliku CSV
-            save_choice = input("Czy chcesz zapisać raport w formacie CSV? (tak/nie): ").strip().lower()
-            if save_choice == "tak":
-                self.save_report_to_csv(report, f"comparison_analysis_{location1_name}_vs_{location2_name}.csv")
-        else:
-            print("Jedna lub obie lokalizacje nie zostały znalezione.")
+        # Analiza porównawcza
+        analysis = ComparisonAnalysis()
+        raw_report = analysis.analyze(data, selected_locations)
+
+        # Budowanie raportu za pomocą buildera
+        builder = ComparisonAnalysisReportBuilder()
+        director = ReportDirector()
+        final_report = director.construct(builder, raw_report.details)
+
+        # Wyświetlanie raportu
+        print("=== Raport porównawczy ===")
+        for comparison in final_report.details:
+            print(f"{comparison['comparison']}:")
+            print(f"  Max Temp: {comparison['max_temperature']}")
+            print(f"  Min Temp: {comparison['min_temperature']}")
+            print(f"  Max Wind Speed: {comparison['max_wind_speed']}")
+            print(f"  Min Wind Speed: {comparison['min_wind_speed']}")
+
 
     def save_report_to_csv(self, report, filename: str):
         """
@@ -257,74 +351,8 @@ class ConsoleInterface:
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisywania pliku: {e}")
 
-    def import_export_data(self):
-        print("Import/Eksport jeszcze niezaimplementowany.")
-
-    def manage_user(self):
-        """
-        Zarządzanie użytkownikiem aplikacji.
-        """
-        while True:
-            self.clear_screen()
-            print("=== Zarządzanie użytkownikiem ===")
-            print("1. Dodaj ulubioną lokalizację")
-            print("2. Usuń ulubioną lokalizację")
-            print("3. Wyświetl ulubione lokalizacje")
-            print("4. Dodaj alert użytkownika")
-            print("5. Wywołaj wszystkie alerty użytkownika")
-            print("6. Powrót do menu głównego")
-
-            choice = input("Wybierz opcję: ")
-            if choice == "1":
-                self.add_favourite_location()
-            elif choice == "2":
-                self.remove_favourite_location()
-            elif choice == "3":
-                self.user.list_favourite_locations()
-                input("\nNaciśnij Enter, aby kontynuować.")
-            elif choice == "4":
-                self.add_user_alert()
-            elif choice == "5":
-                self.user.trigger_all_alerts()
-                input("\nNaciśnij Enter, aby kontynuować.")
-            elif choice == "6":
-                break
-            else:
-                print("Nieprawidłowy wybór, spróbuj ponownie.")
-
-    def add_favourite_location(self):
-        """
-        Dodaje lokalizację do ulubionych lokalizacji użytkownika.
-        """
-        location_name = input("Podaj nazwę lokalizacji: ")
-        self.user.add_favourite_location(location_name)
 
 
-    def remove_favourite_location(self):
-        """
-        Usuwa lokalizację z ulubionych lokalizacji użytkownika.
-        """
-        location_name = input("Podaj nazwę lokalizacji do usunięcia: ")
-        self.user.remove_favourite_location(location_name)
-
-    def add_user_alert(self):
-        """
-        Dodaje alert pogodowy do użytkownika.
-        """
-        location_name = input("Podaj nazwę lokalizacji: ")
-        if location_name in self.locations:
-            alert_type = input("Podaj typ alertu (storm/frost): ")
-            alert_message = input("Podaj treść alertu: ")
-            if alert_type == "storm":
-                alert = StormAlert(location=self.locations[location_name], alert_message=alert_message)
-            elif alert_type == "frost":
-                alert = FrostAlert(location=self.locations[location_name], alert_message=alert_message)
-            else:
-                print("Nieprawidłowy typ alertu.")
-                return
-            self.user.add_alert(alert)
-        else:
-            print("Lokalizacja nieznaleziona.")
 
 
 if __name__ == "__main__":

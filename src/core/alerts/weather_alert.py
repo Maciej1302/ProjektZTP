@@ -1,5 +1,6 @@
 from src.core.alerts.observer import Observer
 from src.core.locations.location_hierarchy import ILocation
+from src.core.weather.weather_data import WeatherData
 
 
 class WeatherAlert(Observer):
@@ -26,12 +27,12 @@ class WeatherAlert(Observer):
 
 
 class StormAlert(WeatherAlert):
-    def trigger_alert(self, weather_data: dict) -> None:
-        if weather_data["wind_speed"] > 10:
-            print(f"ALERT: {self.alert_message} w lokalizacji {self.location.get_name()}!")
+    def trigger_alert(self, weather_data: WeatherData) -> None:
+        if weather_data.wind_speed > 10:
+            print(f"ALERT: {self.alert_message}!")
 
 
 class FrostAlert(WeatherAlert):
-    def trigger_alert(self, weather_data: dict) -> None:
-        if weather_data["temperature"] < 0:
-            print(f"ALERT: {self.alert_message} w lokalizacji {self.location.get_name()}!")
+    def trigger_alert(self, weather_data: WeatherData) -> None:
+        if weather_data.temperature > 0:
+            print(f"ALERT: {self.alert_message}!")

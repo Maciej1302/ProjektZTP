@@ -1,4 +1,6 @@
 from typing import List
+
+from src.core.locations.location_hierarchy import ILocation
 from src.core.weather.weather_data import WeatherData
 from src.core.analysis.analysis_report import AnalysisReport
 from src.core.analysis.analysis_strategy import AnalysisStrategy
@@ -6,27 +8,30 @@ from src.core.analysis.analysis_strategy import AnalysisStrategy
 
 class ComparisonAnalysis(AnalysisStrategy):
     """
-    Klasa realizująca analizę porównawczą na danych pogodowych.
+    Klasa implementująca analizę porównawczą.
     """
 
-    def analyze(self, data: List[WeatherData]) -> AnalysisReport:
+    def analyze(self, data: List[List[WeatherData]], locations: List[ILocation]) -> AnalysisReport:
         report = AnalysisReport()
         report.summary = "Comparison Analysis Report"
 
-        # Porównanie: największe opady i prędkość wiatru
-        max_precipitation = max(data, key=lambda d: d.precipitation)
-        max_wind_speed = max(data, key=lambda d: d.wind_speed)
+        details = []
+        for idx, forecast in enumerate(data):
+            max_temp = max(day.temperature for day in forecast)
+            min_temp = min(day.temperature for day in forecast)
+            max_wind = max(day.wind_speed for day in forecast)
+            min_wind = min(day.wind_speed for day in forecast)
 
-        comparison_details = {
-            "max_precipitation": {
-                "value": max_precipitation.precipitation,
-                "date": max_precipitation.date
-            },
-            "max_wind_speed": {
-                "value": max_wind_speed.wind_speed,
-                "date": max_wind_speed.date
-            }
-        }
+            # Pobieramy nazwę lokalizacji z przekazanych obiektów `locations`
+            city_name = locations[idx].get_name()
 
-        report.details = comparison_details
+            details.append({
+                "city": city_name,
+                "max_temperature": max_temp,
+                "min_temperature": min_temp,
+                "max_wind_speed": max_wind,
+                "min_wind_speed": min_wind,
+            })
+
+        report.details = details
         return report

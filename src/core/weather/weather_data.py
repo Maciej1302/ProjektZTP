@@ -1,30 +1,20 @@
-class WeatherData:
+from src.core.alerts.observer import Subject, Observer
+
+class WeatherData(Subject):
     """
-    Klasa reprezentująca dane pogodowe w aplikacji.
+    Klasa reprezentująca dane pogodowe w aplikacji, implementująca wzorzec Observer jako Subject.
     """
 
     def __init__(self, temperature: float, humidity: float, wind_speed: float, precipitation: float, date: str):
-        """
-        Inicjalizuje obiekt WeatherData.
-
-        :param temperature: Temperatura w stopniach Celsjusza
-        :param humidity: Wilgotność w procentach
-        :param wind_speed: Prędkość wiatru w km/h
-        :param precipitation: Opady w mm
-        :param date: Data pomiaru w formacie YYYY-MM-DD
-        """
+        super().__init__()
         self.temperature = temperature
         self.humidity = humidity
         self.wind_speed = wind_speed
         self.precipitation = precipitation
         self.date = date
+        self._observers: list[Observer] = []
 
     def __repr__(self):
-        """
-        Reprezentacja tekstowa obiektu WeatherData.
-
-        :return: String opisujący dane pogodowe
-        """
         return (
             f"WeatherData(Temperature: {self.temperature}°C, "
             f"Humidity: {self.humidity}%, "
@@ -33,17 +23,23 @@ class WeatherData:
             f"Date: {self.date})"
         )
 
-    def validate(self):
-        """
-        Waliduje dane pogodowe.
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
 
-        :raises ValueError: Jeśli dane są poza dopuszczalnymi granicami
+    def detach(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+
+    def notify(self) -> None:
+        for observer in self._observers:
+            observer.update(self)
+
+    def update_weather(self, temperature: float, humidity: float, wind_speed: float, precipitation: float, date: str):
         """
-        if not (-100 <= self.temperature <= 60):
-            raise ValueError("Temperature must be between -100°C and 60°C.")
-        if not (0 <= self.humidity <= 100):
-            raise ValueError("Humidity must be between 0% and 100%.")
-        if self.wind_speed < 0:
-            raise ValueError("Wind speed cannot be negative.")
-        if self.precipitation < 0:
-            raise ValueError("Precipitation cannot be negative.")
+        Aktualizuje dane pogodowe i powiadamia obserwatorów.
+        """
+        self.temperature = temperature
+        self.humidity = humidity
+        self.wind_speed = wind_speed
+        self.precipitation = precipitation
+        self.date = date
+        self.notify()

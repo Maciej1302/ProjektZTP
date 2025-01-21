@@ -39,12 +39,22 @@ class ComparisonAnalysisReportBuilder(AnalysisReportBuilder):
     def set_summary(self, summary: str) -> None:
         self.report.summary = summary
 
-    def set_details(self, details: dict) -> None:
-        self.report.details = {
-            "type": "Comparison",
-            **details
-        }
-
+    def set_details(self, details: list) -> None:
+        """
+        Ustawia szczegóły raportu porównawczego w formacie miasto1 vs miasto2.
+        """
+        comparisons = []
+        for i in range(len(details) - 1):
+            city1 = details[i].get("city", "Unknown")
+            city2 = details[i + 1].get("city", "Unknown")
+            comparisons.append({
+                "comparison": f"{city1} vs {city2}",
+                "max_temperature": f"{details[i]['max_temperature']}°C vs {details[i + 1]['max_temperature']}°C",
+                "min_temperature": f"{details[i]['min_temperature']}°C vs {details[i + 1]['min_temperature']}°C",
+                "max_wind_speed": f"{details[i]['max_wind_speed']} km/h vs {details[i + 1]['max_wind_speed']} km/h",
+                "min_wind_speed": f"{details[i]['min_wind_speed']} km/h vs {details[i + 1]['min_wind_speed']} km/h",
+            })
+        self.report.details = comparisons
 
 class TrendAnalysisReportBuilder(AnalysisReportBuilder):
     """
